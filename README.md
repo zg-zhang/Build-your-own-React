@@ -6,3 +6,4 @@
 所有代码都已备注，为阅读精通 React 源码打好基础
 
 * [步骤零：回顾](./0_Review.js)
+* [步骤一：createElement 函数](./1_createElement.js)
