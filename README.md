@@ -9,6 +9,7 @@
 * [步骤零：回顾](./0_Review.js)
 * [步骤一：createElement 函数](./1_createElement.js)
 * [步骤二：render 函数](./2_render.js)
+* [步骤三：render 函数](./3_concurrent-mode.js)
 
 ```text
 

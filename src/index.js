@@ -48,6 +48,25 @@ function render(element, container) {
 	container.appendChild(dom)
 }
 
+let nextUnitOfWork = null
+
+function workLoop(deadline) {
+	let shouldYield = false
+	while (nextUnitOfWork && !shouldYield) { // 有下一个工作单元且不需要生产
+		nextUnitOfWork = performUnitOfWork(
+			nextUnitOfWork
+		)
+		shouldYield = deadline.timeRemaining() < 1
+	}
+	requestIdleCallback(workLoop)
+}
+
+requestIdleCallback(workLoop)
+
+function performUnitOfWork(nextUnitOfWork) {
+	//TODO
+}
+
 const Didact = {
 	createElement,
 	render,
