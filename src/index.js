@@ -27,8 +27,7 @@ function createTextElement(text) {
 	}
 }
 
-// 用于将 createElement 生成的对象变成 dom 并渲染到 container 里
-function render(element, container) {
+function createDom(fiber) {
 	const dom =
 		element.type === 'TEXT_ELEMENT' // 判断是否是基础类型
 			? document.createTextNode('')
@@ -41,11 +40,17 @@ function render(element, container) {
 			dom[name] = element.props[name]
 		})
 
-	element.props.children.forEach(child => // 递归遍历整个 element
-		render(child, dom)
-	)
+	return dom
+}
 
-	container.appendChild(dom)
+// 用于将 createElement 生成的对象变成 dom 并渲染到 container 里
+function render(element, container) {
+	nextUnitOfWork = {
+		dom: container,
+		props: {
+			children: [element]
+		}
+	}
 }
 
 let nextUnitOfWork = null
@@ -63,8 +68,49 @@ function workLoop(deadline) {
 
 requestIdleCallback(workLoop)
 
-function performUnitOfWork(nextUnitOfWork) {
-	//TODO
+function performUnitOfWork(fiber) {
+	if (!fiber.dom) {
+		fiber.dom = createDom(fiber)
+	}
+
+	if (fiber.parent) {
+		fiber.parent.dom.appendChild(fiber.dom)
+	}
+
+	const elements = fiber.props.children
+	let index = 0
+	let prevSibling = null
+
+	while (index < elements.length) {
+		const element = elements[index]
+		// 创建新 fiber
+		const newFiber = {
+			type: elements.type,
+			props: elements.props,
+			parent: fiber,
+			dom: null,
+		}
+		// 根据是否为第一个节点，添加到对应的 child / sibling 上面
+		if (index === 0) {
+			fiber.child = newFiber
+		} else {
+			prevSibling.sibling = newFiber
+		}
+
+		prevSibling = newFiber
+		index++
+	}
+
+	if (fiber.child) {
+		return fiber.child
+	}
+	let nextFiber = fiber
+	while (nextFiber) {
+		if (nextFiber.sibling) {
+			return newFiber.sibling
+		}
+		nextFiber = newFiber.parent
+	}
 }
 
 const Didact = {
